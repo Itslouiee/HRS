@@ -1,0 +1,7 @@
+# The portal pages intentionally keep their existing .html URLs while using
+# PHP sessions and server-rendered access controls.
+AddHandler application/x-httpd-php .html
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

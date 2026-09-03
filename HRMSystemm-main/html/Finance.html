@@ -1,0 +1,389 @@
+<?php require_once dirname(__DIR__) . '/php/portal_guard.php'; requirePortalRole('finance'); ?>
+<!doctype html>
+<html lang="en" data-portal-role="finance">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="../js/portal-security.js" defer></script>
+  <title>Quadra Cafe HRMS - Finance</title>
+  <link rel="stylesheet" href="../css/Finance.css?v=3">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+  <div class="particles">
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+    <div class="particle p5"></div>
+    <div class="particle p6"></div>
+  </div>
+
+  <div class="corner-deco tl"></div>
+  <div class="corner-deco tr"></div>
+  <div class="corner-deco bl"></div>
+  <div class="corner-deco br"></div>
+
+  <div class="dashboard-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-wrapper">
+          <div class="sidebar-logo-glow"></div>
+          <img src="../images/quadra.jpg" class="sidebar-logo" alt="Quadra Cafe">
+        </div>
+        <h3 class="sidebar-brand">Quadra Cafe</h3>
+        <span class="sidebar-sub">Finance Panel</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-page="dashboard" href="#dashboard">
+          <i class="fas fa-chart-pie"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" data-page="records" href="#records">
+          <i class="fas fa-money-check-dollar"></i>
+          <span>Payroll Records</span>
+        </a>
+        <a class="nav-item" data-page="history" href="#history">
+          <i class="fas fa-clock-rotate-left"></i>
+          <span>Payroll History</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">
+            <i class="fas fa-user-cog"></i>
+          </div>
+          <div class="sidebar-user-info">
+            <span class="sidebar-user-name">Finance Officer</span>
+            <span class="sidebar-user-role">Finance Panel</span>
+          </div>
+        </div>
+        <a href="#" class="sidebar-logout" title="Sign Out" onclick="securePortalLogout(); return false;">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+      </header>
+
+      <section id="page-dashboard" class="page-content active">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Finance Dashboard</h1>
+            <p class="page-subtitle">Financial summaries from issued payroll records</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-gold" onclick="loadSummary()">
+              <i class="fas fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <p id="financePeriod" class="period">Loading latest payroll status...</p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-employees">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Total Employees</span>
+              <span class="stat-value" id="totalEmployees">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-green">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Total Gross Payroll</span>
+              <span class="stat-value" id="totalGross">₱0.00</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-pending">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Total Deductions</span>
+              <span class="stat-value" id="totalDeductions">₱0.00</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-approved">
+              <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Total Net Payroll</span>
+              <span class="stat-value" id="totalNet">₱0.00</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-pending">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Pending Payments</span>
+              <span class="stat-value" id="pendingPayments">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-approved">
+              <i class="fas fa-circle-check"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Paid Payroll</span>
+              <span class="stat-value" id="paidPayroll">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:24px;">
+         
+  
+        </div>
+      </section>
+
+      <section id="page-records" class="page-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Payroll Records</h1>
+            <p class="page-subtitle">Issued employee payslips and automatic payment status</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-gold" onclick="loadRecords()">
+              <i class="fas fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="filters-bar">
+          <select class="filter-select" id="recordPeriod">
+            <option value="">All payroll periods</option>
+          </select>
+          <select class="filter-select" id="recordStatus">
+            <option value="">All statuses</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-money-check-dollar"></i> Payroll Records</h3>
+            <span style="color:rgba(230,214,194,.3);font-size:13px;" id="recordsCount">Loading...</span>
+          </div>
+          <div class="card-body">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Payroll Period</th>
+                    <th>Gross Pay</th>
+                    <th>Deductions</th>
+                    <th>Net Pay</th>
+                    <th>Payment</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="recordsBody">
+                  <tr><td colspan="7" style="text-align:center;">Loading payroll records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-history" class="page-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Payroll History</h1>
+            <p class="page-subtitle">Issued payroll periods and financial totals</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-gold" onclick="loadHistory()">
+              <i class="fas fa-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="history-grid" id="historyBody"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="payslipModal">
+    <div class="modal">
+      <button class="close" onclick="closePayslip()"><i class="fas fa-times"></i></button>
+      <p class="eyebrow">PAYROLL STATEMENT</p>
+      <h2 id="slipName">Employee Payslip</h2>
+      <p class="muted" id="slipPeriod"></p>
+      <div class="net-box">
+        <span>NET PAY</span>
+        <strong id="slipNet">₱0.00</strong>
+        <span class="status paid">Paid</span>
+      </div>
+      <div class="slip-grid">
+        <section>
+          <h3>Earnings</h3>
+          <div id="slipEarnings"></div>
+          <div class="total">
+            <span>Gross Pay</span>
+            <strong id="slipGross">₱0.00</strong>
+          </div>
+        </section>
+        <section>
+          <h3>Deductions</h3>
+          <div id="slipDeductions"></div>
+          <div class="total">
+            <span>Total Deductions</span>
+            <strong id="slipDeductionsTotal">₱0.00</strong>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const money = v => '₱' + Number(v || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const esc = v => String(v ?? '').replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+
+    async function api(action, p = {}) {
+      const r = await fetch('../php/finance.php?' + new URLSearchParams({ action, ...p }), { cache: 'no-store' });
+      const j = await r.json();
+      if (!r.ok || !j.success) throw Error(j.message || 'Request failed');
+      return j;
+    }
+
+    function page(n) {
+      document.querySelectorAll('.page-content').forEach(x => x.classList.toggle('active', x.id === 'page-' + n));
+      document.querySelectorAll('.nav-item').forEach(x => x.classList.toggle('active', x.dataset.page === n));
+      if (n === 'records') loadRecords();
+      if (n === 'history') loadHistory();
+    }
+
+    document.querySelectorAll('.nav-item').forEach(x => {
+      x.onclick = e => {
+        e.preventDefault();
+        page(x.dataset.page);
+      };
+    });
+
+    async function loadSummary() {
+      try {
+        const s = (await api('summary')).summary;
+        totalEmployees.textContent = s.total_employees;
+        totalGross.textContent = money(s.total_gross_payroll);
+        totalDeductions.textContent = money(s.total_deductions);
+        totalNet.textContent = money(s.total_net_payroll);
+        pendingPayments.textContent = s.pending_payments;
+        paidPayroll.textContent = s.paid_payroll;
+        financePeriod.textContent = 'Latest closed cutoff: ' + s.latest_period;
+      } catch (e) {
+        financePeriod.textContent = e.message;
+      }
+    }
+
+    async function loadRecords() {
+      const b = recordsBody;
+      b.innerHTML = '<tr><td colspan="7">Loading payroll records...</td></tr>';
+      try {
+        const d = await api('records', { period: recordPeriod.value, payment_status: recordStatus.value });
+        const periods = [...new Map(d.records.map(x => [x.period, x.period_label])).entries()];
+        const old = recordPeriod.value;
+        recordPeriod.innerHTML = '<option value="">All payroll periods</option>' + periods.map(x => '<option value="' + x[0] + '">' + esc(x[1]) + '</option>').join('');
+        recordPeriod.value = old;
+        recordsCount.textContent = d.records.length + ' record(s)';
+        b.innerHTML = d.records.length ? d.records.map(x =>
+          '<tr><td><strong>' + esc(x.full_name) + '</strong><small>' + esc(x.position) + '</small></td>' +
+          '<td>' + esc(x.period_label) + '</td>' +
+          '<td>' + money(x.gross_pay) + '</td>' +
+          '<td class="deduction">' + money(x.total_deductions) + '</td>' +
+          '<td><strong>' + money(x.net_pay) + '</strong></td>' +
+          '<td><span class="status paid">Paid</span></td>' +
+          '<td><button class="view" onclick="payslip(' + x.id + ')">View Payslip</button></td></tr>'
+        ).join('') : '<tr><td colspan="7">No issued payroll records found.</td></tr>';
+      } catch (e) {
+        b.innerHTML = '<tr><td colspan="7">' + esc(e.message) + '</td></tr>';
+      }
+    }
+
+    recordPeriod.onchange = loadRecords;
+    recordStatus.onchange = loadRecords;
+
+    async function loadHistory() {
+      try {
+        const d = await api('history');
+        historyBody.innerHTML = d.records.length ? d.records.map(x =>
+          '<article class="history-card">' +
+            '<p class="eyebrow">ISSUED PAYROLL</p>' +
+            '<h3>' + esc(x.period_label) + '</h3>' +
+            '<p class="muted">' + x.employees + ' employees · ' + x.paid + ' paid</p>' +
+            '<div><span>Gross Payroll</span><strong>' + money(x.total_gross) + '</strong></div>' +
+            '<div><span>Deductions</span><strong class="deduction">' + money(x.total_deductions) + '</strong></div>' +
+            '<div class="net-row"><span>Total Net Pay</span><strong>' + money(x.total_net) + '</strong></div>' +
+          '</article>'
+        ).join('') : 'No issued payroll history yet.';
+      } catch (e) {
+        historyBody.textContent = e.message;
+      }
+    }
+
+    async function payslip(id) {
+      try {
+        const r = (await api('payslip', { id })).record;
+        const line = (n, v) => '<p><span>' + n + '</span><strong>' + money(v) + '</strong></p>';
+        slipName.textContent = r.full_name;
+        slipPeriod.textContent = r.period_label + ' · ' + r.position;
+        slipNet.textContent = money(r.net_pay);
+        slipGross.textContent = money(r.gross_pay);
+        slipDeductionsTotal.textContent = money(r.total_deductions);
+        slipEarnings.innerHTML = line('Basic Pay', r.basic_pay) + line('Rice Allowance', r.rice_allowance) + line('Transportation', r.transport_allowance) + line('Overtime Pay', r.overtime_pay);
+        slipDeductions.innerHTML = line('SSS', r.sss) + line('PhilHealth', r.philhealth) + line('Pag-IBIG', r.pagibig) + line('Withholding Tax', r.withholding_tax) + line('Absence', r.absence_deduction) + line('Unpaid Leave', r.unpaid_leave_deduction) + line('Late', r.late_deduction);
+        payslipModal.classList.add('show');
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function closePayslip() {
+      payslipModal.classList.remove('show');
+    }
+
+    payslipModal.onclick = e => {
+      if (e.target === payslipModal) closePayslip();
+    };
+
+    document.getElementById('menuToggle').addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('show');
+    });
+
+    document.addEventListener('click', function(e) {
+      const sidebar = document.getElementById('sidebar');
+      const toggle = document.getElementById('menuToggle');
+      if (window.innerWidth <= 992) {
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+          sidebar.classList.remove('show');
+        }
+      }
+    });
+
+    loadSummary();
+  </script>
+</body>
+</html>

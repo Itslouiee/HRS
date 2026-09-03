@@ -1,0 +1,115 @@
+<?php
+require_once dirname(__DIR__) . '/php/portal_guard.php';
+requirePortalRole('employee');
+header('Location: Employee.html', true, 302);
+exit;
+?>
+<!DOCTYPE html>
+<html lang="en" data-portal-role="employee">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quadra Cafe HRMS - My Contract</title>
+  <link rel="stylesheet" href="../css/Employee.css?v=20260903-contract-portal">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="../js/portal-security.js" defer></script>
+  <style>
+    .dashboard-wrapper{opacity:1!important;transform:none!important;animation:none!important}
+    .contract-only-nav{display:flex!important}
+    .contract-only-content{display:block!important;opacity:1!important;transform:none!important;animation:none!important;padding:35px}
+    .contract-notice{display:flex;gap:14px;align-items:flex-start;margin-bottom:24px;padding:16px 18px;border:1px solid rgba(201,161,122,.2);border-radius:13px;background:rgba(201,161,122,.07);color:rgba(230,214,194,.72);font-size:13px;line-height:1.65}
+    .contract-notice i{margin-top:3px;color:#C9A17A;font-size:18px}
+    .contract-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:20px}
+    .contract-file{color:#E6D6C2;font-size:14px;overflow-wrap:anywhere}
+    .contract-file i{margin-right:8px;color:#C9A17A}
+    .contract-state{display:inline-flex;margin-bottom:15px;padding:7px 12px;border-radius:20px;background:rgba(201,161,122,.12);color:#C9A17A;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .contract-message{margin-top:18px;padding:12px 14px;border-radius:10px;background:rgba(201,161,122,.09);color:#E6D6C2;font-size:13px;display:none}
+    .contract-message.error{background:rgba(166,111,69,.16);color:#E2B48B}
+    @media(max-width:992px){.contract-only-content{padding:25px}.sidebar{left:0;position:fixed}.main-content{margin-left:265px}.menu-toggle{display:none}}
+    @media(max-width:700px){.sidebar{position:relative;width:100%;height:auto}.dashboard-wrapper{display:block}.main-content{margin-left:0}.contract-only-content{padding:20px}.sidebar-footer{position:relative}.topbar{padding:15px 20px}}
+  </style>
+</head>
+<body>
+  <div class="particles"><div class="particle p1"></div><div class="particle p2"></div><div class="particle p3"></div></div>
+  <div class="corner-deco tl"></div><div class="corner-deco tr"></div><div class="corner-deco bl"></div><div class="corner-deco br"></div>
+  <div class="dashboard-wrapper">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-wrapper"><div class="sidebar-logo-glow"></div><img src="../images/logo.png" class="sidebar-logo" alt="Quadra Cafe"></div>
+        <h3 class="sidebar-brand">Quadra Cafe</h3><span class="sidebar-sub">Employee Portal</span>
+      </div>
+      <nav class="sidebar-nav"><a href="#" class="nav-item active contract-only-nav"><i class="fas fa-file-signature"></i><span>My Contract</span></a></nav>
+      <div class="sidebar-footer"><div class="sidebar-user"><div class="sidebar-avatar"><i class="fas fa-user"></i></div><div class="sidebar-user-info"><span class="sidebar-user-name">New Employee</span><span class="sidebar-user-role">Limited Access</span></div></div><a href="#" class="sidebar-logout" id="contractLogout" title="Sign Out"><i class="fas fa-sign-out-alt"></i></a></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div class="topbar-info"><i class="fas fa-building"></i><span>Quadra Cafe HRMS — Contract Onboarding</span></div><div class="topbar-right"><div class="topbar-date"><i class="fas fa-calendar-day"></i><span id="currentDate"></span></div></div></header>
+      <section class="page-content active contract-only-content">
+        <div class="page-header"><div><h1 class="page-title">My Contract</h1><p class="page-subtitle">Complete your employment contract to unlock full HRMS access</p></div></div>
+        <div class="contract-notice"><i class="fas fa-lock"></i><span>Your account currently has limited access. View or download the contract prepared by HR, sign it, then upload the signed copy. HR verification and Manager confirmation are required before the remaining features unlock.</span></div>
+        <div class="card government-documents-card">
+          <div class="card-header"><h3 class="card-title"><i class="fas fa-file-signature"></i> Employment Contract</h3></div>
+          <div class="card-body" id="contractBody"><div class="document-loading"><i class="fas fa-spinner fa-spin"></i> Loading your contract...</div></div>
+        </div>
+        <div class="contract-message" id="contractMessage"></div>
+      </section>
+    </main>
+  </div>
+  <input type="file" id="signedContractFile" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" hidden>
+  <div class="signout-modal-overlay" id="contractAlertModal">
+    <div class="signout-modal">
+      <div class="signout-modal-icon" id="contractAlertIcon"><i class="fas fa-circle-check"></i></div>
+      <h2 class="signout-modal-title" id="contractAlertTitle">Success</h2>
+      <p class="signout-modal-desc" id="contractAlertText"></p>
+      <div class="signout-modal-actions"><button type="button" class="signout-modal-btn signout-btn-confirm" id="contractAlertClose">Continue</button></div>
+    </div>
+  </div>
+  <div class="signout-modal-overlay" id="contractLogoutModal">
+    <div class="signout-modal">
+      <div class="signout-modal-icon"><i class="fas fa-sign-out-alt"></i></div>
+      <h2 class="signout-modal-title">Sign Out</h2>
+      <p class="signout-modal-desc">Are you sure you want to sign out? You will be redirected to the login page.</p>
+      <div class="signout-modal-actions">
+        <button type="button" class="signout-modal-btn signout-btn-cancel" id="contractLogoutCancel">Cancel</button>
+        <button type="button" class="signout-modal-btn signout-btn-confirm" id="contractLogoutConfirm">Sign Out</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const escapeHtml = value => String(value || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    function message(text,error=false){
+      const modal=document.getElementById('contractAlertModal');
+      document.getElementById('contractAlertTitle').textContent=error?'Action Not Completed':'Success';
+      document.getElementById('contractAlertText').textContent=text;
+      document.getElementById('contractAlertIcon').innerHTML=error?'<i class="fas fa-triangle-exclamation"></i>':'<i class="fas fa-circle-check"></i>';
+      modal.classList.add('show');
+    }
+    async function loadContract(){
+      const body=document.getElementById('contractBody');
+      try{
+        const response=await fetch('../php/employee_documents.php?action=mine',{cache:'no-store'});const result=await response.json();
+        if(!response.ok||!result.success)throw new Error(result.message||'Unable to load your contract.');
+        const contract=(result.documents||[]).find(item=>item.document_type==='employment_contract');
+        if(!contract){body.innerHTML='<div class="document-loading"><i class="fas fa-hourglass-half"></i> HR has not uploaded your contract yet. Please check again later.</div>';return;}
+        const status=contract.contract_status==='verified'?'Verified':contract.contract_status==='signed'?'Signed — For HR Verification':contract.verification_status==='rejected'?'Needs Replacement':'For Signing';
+        const uploadAction=contract.contract_status==='for_signing'?'<button class="btn btn-gold" id="uploadSigned"><i class="fas fa-upload"></i> Upload Signed Contract</button>':'';
+        body.innerHTML='<span class="contract-state">'+escapeHtml(status)+'</span><div class="contract-file"><i class="fas fa-file-lines"></i>'+escapeHtml(contract.file_name)+'</div><div class="contract-actions"><a class="btn btn-outline" target="_blank" rel="noopener" href="../php/employee_documents.php?action=file&document_id='+Number(contract.document_id)+'"><i class="fas fa-eye"></i> View Contract</a><a class="btn btn-outline" href="../php/employee_documents.php?action=file&document_id='+Number(contract.document_id)+'&download=1"><i class="fas fa-download"></i> Download</a>'+uploadAction+'</div>'+(contract.rejection_reason?'<div class="document-rejection"><i class="fas fa-circle-exclamation"></i><span><strong>HR reason:</strong> '+escapeHtml(contract.rejection_reason)+'</span></div>':'');
+        const uploadButton=document.getElementById('uploadSigned');if(uploadButton)uploadButton.onclick=()=>document.getElementById('signedContractFile').click();
+      }catch(error){body.innerHTML='<div class="document-loading document-error"><i class="fas fa-circle-exclamation"></i> '+escapeHtml(error.message)+'</div>';}
+    }
+    document.getElementById('signedContractFile').addEventListener('change',async function(){const file=this.files&&this.files[0];if(!file)return;if(file.size>10*1024*1024){message('Contract file must not exceed 10 MB.',true);this.value='';return;}const form=new FormData();form.append('action','upload');form.append('document_type','employment_contract');form.append('document',file);try{const response=await fetch('../php/employee_documents.php',{method:'POST',body:form});const result=await response.json();if(!response.ok||!result.success)throw new Error(result.message||'Upload failed.');message(result.message);await loadContract();}catch(error){message(error.message,true);}finally{this.value='';}});
+    const alertModal=document.getElementById('contractAlertModal');
+    const logoutModal=document.getElementById('contractLogoutModal');
+    document.getElementById('contractAlertClose').onclick=()=>alertModal.classList.remove('show');
+    document.getElementById('contractLogout').addEventListener('click',function(event){event.preventDefault();logoutModal.classList.add('show');});
+    document.getElementById('contractLogoutCancel').onclick=()=>logoutModal.classList.remove('show');
+    document.getElementById('contractLogoutConfirm').onclick=async function(){this.disabled=true;this.innerHTML='<i class="fas fa-spinner fa-spin"></i> Signing Out...';await securePortalLogout();};
+    alertModal.addEventListener('click',event=>{if(event.target===alertModal)alertModal.classList.remove('show');});
+    logoutModal.addEventListener('click',event=>{if(event.target===logoutModal)logoutModal.classList.remove('show');});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'){alertModal.classList.remove('show');logoutModal.classList.remove('show');}});
+    loadContract();
+  </script>
+</body>
+</html>

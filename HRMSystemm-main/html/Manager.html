@@ -1,0 +1,483 @@
+<?php require_once dirname(__DIR__) . '/php/portal_guard.php'; requirePortalRole('manager'); ?>
+<!DOCTYPE html>
+<html lang="en" data-portal-role="manager">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../js/portal-security.js" defer></script>
+  <title>Quadra Cafe HRMS - Hiring Manager</title>
+  <link rel="stylesheet" href="../css/Hr.css?v=20260812-manager">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    #managerAlertModal .signout-modal { color: #F5EBDD; }
+    #managerAlertModal .signout-modal-title { color: #FFF8EF; margin-bottom: 14px; }
+    #managerAlertModal .signout-modal-desc {
+      color: rgba(245, 235, 221, .9) !important;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.65;
+    }
+    .manager-detail-grid { display: grid; gap: 9px; margin-top: 4px; text-align: left; }
+    .manager-detail-row {
+      display: grid;
+      grid-template-columns: 118px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      padding: 10px 12px;
+      background: rgba(230, 214, 194, .07);
+      border: 1px solid rgba(201, 161, 122, .16);
+      border-radius: 9px;
+    }
+    .manager-detail-label { color: #D8AB7E; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .manager-detail-value { color: #FFF8EF; font-size: 13px; font-weight: 500; overflow-wrap: anywhere; }
+    #managerScheduleModal .signout-modal {
+      width: min(500px, calc(100vw - 32px));
+      padding: 34px 36px 30px;
+      text-align: left;
+    }
+    #managerScheduleModal .signout-modal-icon { width: 68px; height: 68px; font-size: 29px; margin-bottom: 16px; }
+    #managerScheduleModal .signout-modal-title { margin: 0 0 6px; color: #FFF8EF; text-align: center; }
+    #managerScheduleModal .signout-modal-desc { margin: 0 0 25px; color: #D8AB7E !important; font-weight: 600; text-align: center; }
+    #managerScheduleForm { display: grid; gap: 17px; }
+    #managerScheduleForm .form-group { margin: 0; }
+    #managerScheduleForm label {
+      display: block;
+      margin: 0 0 8px;
+      color: rgba(255, 248, 239, .76);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .025em;
+    }
+    #managerScheduleForm input {
+      display: block;
+      width: 100%;
+      min-height: 48px;
+      box-sizing: border-box;
+      padding: 11px 14px;
+      border: 1px solid rgba(201, 161, 122, .26);
+      border-radius: 11px;
+      outline: none;
+      background: rgba(255, 248, 239, .06);
+      color: #FFF8EF;
+      font: 500 13px 'Poppins', sans-serif;
+      transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+      color-scheme: dark;
+    }
+    #managerScheduleForm input::placeholder { color: rgba(255, 248, 239, .35); }
+    #managerScheduleForm input:hover { border-color: rgba(201, 161, 122, .48); background: rgba(255, 248, 239, .08); }
+    #managerScheduleForm input:focus { border-color: #C9A17A; background: rgba(255, 248, 239, .09); box-shadow: 0 0 0 3px rgba(201, 161, 122, .12); }
+    #managerScheduleForm .signout-modal-actions { margin-top: 8px; }
+    #managerScheduleForm .signout-modal-btn { flex: 1; }
+    @media (max-width: 520px) {
+      .manager-detail-row { grid-template-columns: 1fr; gap: 3px; }
+      #managerScheduleModal .signout-modal { padding: 28px 20px 24px; }
+      #managerScheduleForm .signout-modal-actions { flex-direction: column-reverse; }
+      #managerScheduleForm .signout-modal-btn { width: 100%; }
+    }
+  </style></head>
+
+<body>
+  <div class="dashboard-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-wrapper">
+          <div class="sidebar-logo-glow"></div>
+          <img src="../images/quadra.jpg" class="sidebar-logo" alt="Logo">
+        </div>
+        <h3 class="sidebar-brand">Quadra Cafe</h3>
+        <span class="sidebar-sub">Hiring Manager</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-item" data-page="final-interviews">
+          <i class="fas fa-user-tie"></i>
+          <span>Hiring Workflow</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar"><i class="fas fa-user-tie"></i></div>
+          <div class="sidebar-user-info">
+            <span class="sidebar-user-name">Hiring Manager</span>
+            <span class="sidebar-user-role">Final Interview</span>
+          </div>
+        </div>
+        <a href="#" class="sidebar-logout" title="Sign Out" onclick="showSignoutModal(); return false;">
+          <i class="fas fa-sign-out-alt"></i>
+        </a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <div class="topbar-search">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search applicants..." id="managerSearch">
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-notif" id="notifToggle"><i class="fas fa-bell"></i></div>
+          <div class="topbar-date"><i class="fas fa-calendar-day"></i> <span id="currentDate"></span></div>
+        </div>
+      </header>
+
+      <div class="page-content active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Final Interview Management</h1>
+            <p class="page-subtitle">Manage final interviews and confirm employment after HR verifies the contract.</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-gold" onclick="loadManagerApplicants()"><i class="fas fa-sync"></i> Refresh</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-scheduled"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <span class="stat-label">Scheduled</span>
+              <span class="stat-value" id="managerScheduledCount">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-arrived"><i class="fas fa-location-dot"></i></div>
+            <div class="stat-info">
+              <span class="stat-label">Arrived</span>
+              <span class="stat-value" id="managerArrivedCount">0</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-approved"><i class="fas fa-thumbs-up"></i></div>
+            <div class="stat-info">
+              <span class="stat-label">Ready to Decide</span>
+              <span class="stat-value" id="managerReadyCount">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-user-tie"></i> Final Interview & Employment Confirmation</h3>
+          </div>
+          <div class="card-body">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Applicant</th>
+                    <th>Position</th>
+                    <th>Interview</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="managerInterviewTableBody">
+                  <tr><td colspan="5" style="text-align:center;">Loading final interviews...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="signout-modal-overlay" id="signoutModal">
+    <div class="signout-modal">
+      <div class="signout-modal-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h2 class="signout-modal-title">Sign Out</h2>
+      <p class="signout-modal-desc">Are you sure you want to sign out of the Hiring Manager portal? You will be redirected to the login page.</p>
+      <div class="signout-modal-actions">
+        <button type="button" class="signout-modal-btn signout-btn-cancel" onclick="hideSignoutModal()">Cancel</button>
+        <button type="button" class="signout-modal-btn signout-btn-confirm" id="managerSignoutConfirm" onclick="confirmSignout()">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="signout-modal-overlay" id="managerAlertModal">
+    <div class="signout-modal" style="max-width:430px;">
+      <div class="signout-modal-icon" id="managerAlertIcon"><i class="fas fa-check"></i></div>
+      <h3 class="signout-modal-title" id="managerAlertTitle">Success</h3>
+      <p class="signout-modal-desc" id="managerAlertMessage" style="white-space:pre-line;"></p>
+      <div class="signout-modal-actions"><button class="signout-modal-btn signout-btn-confirm" id="managerAlertClose">Continue</button></div>
+    </div>
+  </div>
+
+  <div class="signout-modal-overlay" id="managerConfirmModal">
+    <div class="signout-modal" style="max-width:440px;">
+      <div class="signout-modal-icon"><i class="fas fa-circle-question"></i></div>
+      <h3 class="signout-modal-title" id="managerConfirmTitle">Confirm Action</h3>
+      <p class="signout-modal-desc" id="managerConfirmMessage"></p>
+      <div class="signout-modal-actions">
+        <button class="signout-modal-btn signout-btn-cancel" id="managerConfirmCancel">Cancel</button>
+        <button class="signout-modal-btn signout-btn-confirm" id="managerConfirmAccept">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="signout-modal-overlay" id="managerScheduleModal">
+    <div class="signout-modal">
+      <div class="signout-modal-icon"><i class="fas fa-calendar-check"></i></div>
+      <h3 class="signout-modal-title">Schedule Final Interview</h3>
+      <p class="signout-modal-desc" id="managerScheduleName"></p>
+      <form id="managerScheduleForm">
+        <div class="form-group"><label for="managerScheduleDate">Interview Date</label><input type="date" id="managerScheduleDate" required></div>
+        <div class="form-group"><label for="managerScheduleTime">Interview Time</label><input type="time" id="managerScheduleTime" required></div>
+        <div class="form-group"><label for="managerScheduleLocation">Venue or Meeting Link</label><input type="text" id="managerScheduleLocation" maxlength="255" placeholder="Enter venue or meeting link" required></div>
+        <div class="signout-modal-actions">
+          <button type="button" class="signout-modal-btn signout-btn-cancel" id="managerScheduleCancel">Cancel</button>
+          <button type="submit" class="signout-modal-btn signout-btn-confirm">Set Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    let managerApplicants = [];
+    let managerDecisionSaving = false;
+
+    function showManagerAlert(title, message, success = true, allowHtml = false) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('managerAlertModal');
+        document.getElementById('managerAlertTitle').textContent = title;
+        const messageElement = document.getElementById('managerAlertMessage');
+        if (allowHtml) messageElement.innerHTML = message;
+        else messageElement.textContent = message;
+        const icon = document.getElementById('managerAlertIcon');
+        icon.innerHTML = success ? '<i class="fas fa-check"></i>' : '<i class="fas fa-exclamation"></i>';
+        icon.style.background = success ? 'rgba(139,94,60,.15)' : 'rgba(180,70,70,.15)';
+        const close = document.getElementById('managerAlertClose');
+        const done = () => { modal.classList.remove('show'); close.onclick = null; resolve(); };
+        close.onclick = done;
+        modal.classList.add('show');
+      });
+    }
+
+    function confirmManagerAction(title, message, confirmLabel = 'Confirm') {
+      return new Promise(resolve => {
+        const modal = document.getElementById('managerConfirmModal');
+        document.getElementById('managerConfirmTitle').textContent = title;
+        document.getElementById('managerConfirmMessage').textContent = message;
+        const accept = document.getElementById('managerConfirmAccept');
+        const cancel = document.getElementById('managerConfirmCancel');
+        accept.textContent = confirmLabel;
+        const finish = value => { modal.classList.remove('show'); accept.onclick = null; cancel.onclick = null; resolve(value); };
+        accept.onclick = () => finish(true);
+        cancel.onclick = () => finish(false);
+        modal.classList.add('show');
+      });
+    }
+
+    function getManagerSchedule(name) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('managerScheduleModal');
+        const form = document.getElementById('managerScheduleForm');
+        const date = document.getElementById('managerScheduleDate');
+        const time = document.getElementById('managerScheduleTime');
+        const location = document.getElementById('managerScheduleLocation');
+        document.getElementById('managerScheduleName').textContent = name;
+        form.reset();
+        const today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+        date.min = today.toISOString().slice(0, 10);
+        const finish = value => { modal.classList.remove('show'); form.onsubmit = null; document.getElementById('managerScheduleCancel').onclick = null; resolve(value); };
+        form.onsubmit = event => { event.preventDefault(); finish({ date:date.value, time:time.value, location:location.value.trim() }); };
+        document.getElementById('managerScheduleCancel').onclick = () => finish(null);
+        modal.classList.add('show');
+      });
+    }
+
+
+    function updateDate() {
+      const now = new Date();
+      document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    async function loadManagerApplicants() {
+      const tbody = document.getElementById('managerInterviewTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:rgba(230,214,194,.7)"><i class="fas fa-spinner fa-spin"></i> Loading final interview candidates...</td></tr>';
+      try {
+        const response = await fetch('../php/applicants.php?action=list&view=manager');
+        if (response.status === 401 || response.status === 403) {
+          await showManagerAlert('Session Expired', 'Please sign in again to continue.', false);
+          window.location.href = 'Login.html';
+          return;
+        }
+        const result = await response.json();
+        if (!result.success) throw new Error(result.message || 'Unable to load applicants.');
+        managerApplicants = result.applicants || [];
+        renderManagerApplicants();
+      } catch (error) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:rgba(230,214,194,.7)">Unable to load final interviews.</td></tr>';
+        console.error(error);
+      }
+    }
+
+    function renderManagerApplicants() {
+      const filter = document.getElementById('managerSearch').value.trim().toLowerCase();
+      const filtered = managerApplicants.map((app, index) => ({ app, index })).filter(({ app }) => {
+        const name = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' ').toLowerCase();
+        return !filter || name.includes(filter) || String(app.position || '').toLowerCase().includes(filter);
+      });
+      const tbody = document.getElementById('managerInterviewTableBody');
+      document.getElementById('managerScheduledCount').textContent = filtered.filter(({app}) => ['final_interview_pending','final_interview_scheduled'].includes(app.status)).length;
+      document.getElementById('managerArrivedCount').textContent = filtered.filter(({app}) => app.status === 'final_interview_arrived').length;
+      document.getElementById('managerReadyCount').textContent = filtered.filter(({app}) => ['final_interview_arrived','final_confirmation_pending'].includes(app.status)).length;
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:28px;color:rgba(230,214,194,.55)">No candidates currently require Manager action.</td></tr>';
+        return;
+      }
+      const labels = {
+        final_interview_pending: 'Ready to Schedule', final_interview_scheduled: 'Scheduled', final_interview_arrived: 'Ready for Decision',
+        final_interview_passed: 'Ready for Contract Handoff', contract_pending: 'With HR for Contract', final_confirmation_pending: 'Ready for Final Confirmation'
+      };
+      tbody.innerHTML = filtered.map(({ app, index }) => {
+        const name = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' ');
+        const interviewLabel = app.interview_date ? new Date(app.interview_date + 'T' + app.interview_time).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Not set';
+        const active = ['final_interview_arrived','final_confirmation_pending'].includes(app.status);
+        let actions = '<button class="btn btn-sm btn-outline" onclick="viewManagerApplicant(' + index + ')"><i class="fas fa-eye"></i></button> ';
+        if (app.status === 'final_interview_pending') actions += '<button class="btn btn-sm btn-gold" onclick="scheduleManagerFinalInterview(' + index + ')"><i class="fas fa-calendar-plus"></i> Schedule</button>';
+        if (app.status === 'final_interview_scheduled') actions += '<button class="btn btn-sm btn-gold" onclick="recordManagerArrival(' + index + ',true)"><i class="fas fa-check"></i> Arrived</button> <button class="btn btn-sm btn-outline" onclick="recordManagerArrival(' + index + ',false)"><i class="fas fa-times"></i> No Show</button>';
+        if (app.status === 'final_interview_arrived') actions += '<button class="btn btn-sm btn-gold" onclick="markFinalInterviewResult(' + index + ',true)"><i class="fas fa-user-check"></i> Hire</button> <button class="btn btn-sm btn-outline" onclick="markFinalInterviewResult(' + index + ',false)"><i class="fas fa-user-times"></i> Not Hire</button>';
+        if (app.status === 'final_interview_passed') actions += '<button class="btn btn-sm btn-gold" onclick="startLegacyContract(' + index + ')"><i class="fas fa-file-signature"></i> Start Contract</button>';
+        if (app.status === 'contract_pending') actions += '<span class="status-badge status-pending">Awaiting HR Verification</span>';
+        if (app.status === 'final_confirmation_pending') actions += '<button class="btn btn-sm btn-gold" onclick="confirmManagerEmployment(' + index + ')"><i class="fas fa-badge-check"></i> Confirm Employment</button>';
+        return '<tr><td><div class="emp-cell"><div class="emp-avatar"><i class="fas fa-user"></i></div><div><span class="emp-name">' + escapeHtml(name) + '</span><span class="emp-email">' + escapeHtml(app.email || '') + '</span></div></div></td><td>' + escapeHtml(app.position || '') + '</td><td>' + escapeHtml(interviewLabel) + '</td><td><span class="status-badge ' + (active ? 'status-active' : 'status-pending') + '">' + escapeHtml(labels[app.status] || app.status) + '</span></td><td><div class="action-btns">' + actions + '</div></td></tr>';
+      }).join('');
+    }
+
+    async function managerWorkflowPost(values) {
+      const response = await fetch('../php/applicants.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(values) });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message || 'Unable to update the hiring workflow.');
+      return result;
+    }
+
+    async function scheduleManagerFinalInterview(index) {
+      const app = managerApplicants[index]; if (!app) return;
+      const name = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' ');
+      const schedule = await getManagerSchedule(name);
+      if (!schedule) return;
+      const { date, time, location } = schedule;
+      try {
+        const result = await managerWorkflowPost({ action:'schedule_interview', id:String(app.id), stage:'final', interview_date:date, interview_time:time, interview_location:location });
+        managerWorkflowPost({ action:'send_interview_email', id:String(app.id), stage:'final' }).catch(error => showManagerAlert('Email Not Sent', error.message, false));
+        await showManagerAlert('Schedule Saved', result.message, true); await loadManagerApplicants();
+      } catch (error) { await showManagerAlert('Action Not Completed', error.message, false); }
+    }
+
+    async function recordManagerArrival(index, arrived) {
+      const app = managerApplicants[index]; if (!app || !await confirmManagerAction('Confirm Arrival Status', arrived ? 'Confirm that this applicant arrived for the final interview?' : 'Mark this applicant as No Show?', arrived ? 'Confirm Arrival' : 'Mark No Show')) return;
+      try { const result = await managerWorkflowPost({ action:'interview_arrival', id:String(app.id), stage:'final', arrived:arrived?'yes':'no' }); await showManagerAlert('Arrival Updated', result.message, true); await loadManagerApplicants(); } catch (error) { await showManagerAlert('Update Failed', error.message, false); }
+    }
+
+    async function startLegacyContract(index) {
+      const app = managerApplicants[index];
+      if (!app || !await confirmManagerAction('Start Contract Processing', 'Send this selected applicant to HR for contract signing and verification?', 'Send to HR')) return;
+      try {
+        const result = await managerWorkflowPost({ action:'start_contract', id:String(app.id) });
+        await showManagerAlert('Action Completed', result.message, true);
+        await loadManagerApplicants();
+      } catch (error) { await showManagerAlert('Action Not Completed', error.message, false); }
+    }
+    async function confirmManagerEmployment(index) {
+      const app = managerApplicants[index]; if (!app || !await confirmManagerAction('Final Employment Confirmation', 'Confirm employment and unlock this employee\'s full HRMS access?', 'Confirm Employment')) return;
+      try { const result = await managerWorkflowPost({ action:'final_confirmation', id:String(app.id) }); await showManagerAlert('Employment Confirmed', result.message, true); await loadManagerApplicants(); } catch (error) { await showManagerAlert('Confirmation Failed', error.message, false); }
+    }
+    async function viewManagerApplicant(index) {
+      const app = managerApplicants[index];
+      if (!app) return;
+      const name = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' ');
+      const statusLabels = {
+        final_interview_pending: 'Ready to Schedule', final_interview_scheduled: 'Final Interview Scheduled',
+        final_interview_arrived: 'Ready for Manager Decision', final_interview_passed: 'Ready for Contract Handoff',
+        contract_pending: 'With HR for Contract', final_confirmation_pending: 'Ready for Final Confirmation'
+      };
+      const interview = app.interview_date
+        ? new Date(app.interview_date + 'T' + (app.interview_time || '00:00')).toLocaleString('en-US', { month:'long', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' })
+        : 'Not yet scheduled';
+      const details = '<div class="manager-detail-grid">' +
+        '<div class="manager-detail-row"><span class="manager-detail-label">Applicant</span><span class="manager-detail-value">' + escapeHtml(name) + '</span></div>' +
+        '<div class="manager-detail-row"><span class="manager-detail-label">Position</span><span class="manager-detail-value">' + escapeHtml(app.position || 'Not specified') + '</span></div>' +
+        '<div class="manager-detail-row"><span class="manager-detail-label">Email</span><span class="manager-detail-value">' + escapeHtml(app.email || 'Not provided') + '</span></div>' +
+        '<div class="manager-detail-row"><span class="manager-detail-label">Interview</span><span class="manager-detail-value">' + escapeHtml(interview) + '</span></div>' +
+        '<div class="manager-detail-row"><span class="manager-detail-label">Status</span><span class="manager-detail-value">' + escapeHtml(statusLabels[app.status] || app.status) + '</span></div></div>';
+      await showManagerAlert('Applicant Details', details, true, true);
+    }
+
+    async function markFinalInterviewResult(index, passed) {
+      const app = managerApplicants[index];
+      if (!app || managerDecisionSaving) return;
+      const name = [app.first_name, app.middle_name, app.last_name].filter(Boolean).join(' ');
+      if (!await confirmManagerAction(passed ? 'Hire Applicant' : 'Do Not Hire', passed ? 'Hire ' + name + '? A limited HRMS account will be created and a unique PIN will be emailed automatically.' : 'Do not hire ' + name + '?', passed ? 'Hire' : 'Not Hire')) return;
+      managerDecisionSaving = true;
+      document.querySelectorAll('#managerInterviewTableBody button').forEach(button => button.disabled = true);
+      try {
+        const body = new URLSearchParams({ action: 'interview_result', id: String(app.id), stage: 'final', result: passed ? 'passed' : 'failed' });
+        const response = await fetch('../php/applicants.php', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || 'Unable to save the final interview result.');
+        await showManagerAlert('Action Completed', result.message, true);
+        await loadManagerApplicants();
+      } catch (error) {
+        await showManagerAlert('Decision Not Saved', error.message || 'Unable to save the final interview result.', false);
+      } finally {
+        managerDecisionSaving = false;
+        document.querySelectorAll('#managerInterviewTableBody button').forEach(button => button.disabled = false);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function showSignoutModal() {
+      document.getElementById('signoutModal').classList.add('show');
+    }
+
+    function hideSignoutModal() {
+      document.getElementById('signoutModal').classList.remove('show');
+    }
+
+    async function confirmSignout() {
+      const button = document.getElementById('managerSignoutConfirm');
+      button.disabled = true;
+      button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing Out...';
+      await securePortalLogout();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDate();
+      loadManagerApplicants();
+      document.getElementById('managerSearch').addEventListener('input', renderManagerApplicants);
+      document.getElementById('managerSearch').addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') event.preventDefault();
+      });
+      document.getElementById('signoutModal').addEventListener('click', function (event) {
+        if (event.target === this) hideSignoutModal();
+      });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') hideSignoutModal();
+      });
+      document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('show'));
+      document.addEventListener('click', function (e) {
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('menuToggle');
+        if (window.innerWidth <= 992 && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
+          sidebar.classList.remove('show');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
