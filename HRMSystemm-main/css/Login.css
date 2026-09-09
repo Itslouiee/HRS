@@ -295,6 +295,9 @@ body::before {
 }
 
 .logo {
+  height: 120px;
+  border-radius: 50%;
+  object-fit: contain;
   width: 120px;
   position: relative;
   z-index: 2;

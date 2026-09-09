@@ -130,6 +130,9 @@ body::before {
 }
 
 .sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   padding: 0 20px 30px;
   border-bottom: 1px solid rgba(201, 161, 122,0.1);
@@ -158,6 +161,9 @@ body::before {
 }
 
 .sidebar-logo {
+  height: 70px;
+  border-radius: 50%;
+  object-fit: contain;
   width: 70px;
   position: relative;
   z-index: 2;
